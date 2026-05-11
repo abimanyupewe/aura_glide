@@ -38,7 +38,12 @@ AuraGlide is a relaxing match-3 puzzle game where you swipe blocks to match colo
 
 ## Screenshots
 
-*(Add your app screenshots here)*
+<p align="center">
+  <img width="43%" alt="Desktop Screenshot" src="https://github.com/user-attachments/assets/3704c1f6-4f3f-4d6d-9ca3-1b13101936d8" />
+  &nbsp; &nbsp; &nbsp;
+  <img width="30%" alt="Mobile Screenshot" src="https://github.com/user-attachments/assets/ef3e8fdc-f5a9-4907-9b3f-174c92abe892" />
+</p>
+
 
 ---
 
