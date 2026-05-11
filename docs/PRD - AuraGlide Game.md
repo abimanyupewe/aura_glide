@@ -3,7 +3,7 @@
 **Project Name:** AuraGlide \- The Calming Puzzle  
 **Platform:** Mobile (Android/iOS) via Flutter  
 **Status:** Draft / Planning  
-**Author:** Solo Developer (Mahasiswa Teknik Informatika Semester 6\)
+**Author:** Solo Developer 
 
 ## **1\. Executive Summary**
 

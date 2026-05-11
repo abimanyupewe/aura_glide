@@ -302,6 +302,122 @@ final scoreRepositoryProvider = Provider<ScoreRepository>((ref) {
 - **Screens**: noun + Screen (HomeScreen, GameScreen)
 - **Widgets**: noun + Widget (BlockWidget, GameGrid)
 
+## 8. Additional Components
+
+### Direction Enum (Block Swipe)
+
+```dart
+// presentation/widgets/block_widget.dart
+enum Direction { up, down, left, right }
+
+enum BlockAnimationState {
+  idle,
+  dragging,
+  matched,
+  falling,
+}
+```
+
+### AppNavigator (Navigation)
+
+```dart
+// app.dart
+class AppNavigator extends StatefulWidget {
+  const AppNavigator({super.key});
+
+  @override
+  State<AppNavigator> createState() => _AppNavigatorState();
+}
+
+class _AppNavigatorState extends State<AppNavigator> {
+  bool _showGame = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showGame) {
+      return const GameScreen();
+    }
+    return HomeScreen(
+      onPlayPressed: () {
+        setState(() {
+          _showGame = true;
+        });
+      },
+    );
+  }
+}
+```
+
+### HowToPlayDialog Widget
+
+```dart
+// presentation/widgets/how_to_play_dialog.dart
+class HowToPlayDialog extends StatelessWidget {
+  const HowToPlayDialog({super.key});
+
+  static void show(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const HowToPlayDialog(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Dialog dengan tutorial cara bermain
+    // Terdapat icon, teks instruksi, dan tombol "Got it!"
+  }
+}
+```
+
+### Updated File Structure
+
+```
+lib/
+├── main.dart
+├── app.dart                           # AuraGlideApp + AppNavigator
+├── core/
+│   ├── constants/
+│   │   ├── app_colors.dart
+│   │   ├── app_typography.dart
+│   │   ├── app_dimensions.dart
+│   │   └── animation_constants.dart
+│   └── theme/
+│       └── app_theme.dart
+├── domain/
+│   ├── entities/
+│   │   ├── block.dart
+│   │   ├── grid.dart
+│   │   └── game_state.dart
+│   ├── repositories/
+│   │   └── score_repository.dart
+│   └── usecases/
+│       ├── swap_blocks.dart
+│       ├── detect_matches.dart
+│       ├── apply_gravity.dart
+│       ├── calculate_score.dart
+│       └── refill_grid.dart           # NEW: Fill empty cells
+├── data/
+│   ├── repositories/
+│   │   └── score_repository_impl.dart
+│   └── datasources/
+│       ├── local_storage.dart
+│       └── shared_preferences_datasource.dart
+└── presentation/
+    ├── providers/
+    │   ├── providers.dart             # All use case providers
+    │   └── game_provider.dart        # GameNotifier
+    ├── screens/
+    │   ├── home_screen.dart          # Main menu + highScoreProvider
+    │   └── game_screen.dart         # Gameplay screen
+    └── widgets/
+        ├── game_grid.dart            # Grid with swipe support
+        ├── block_widget.dart         # Block with gesture detection
+        ├── score_display.dart        # Score UI
+        └── how_to_play_dialog.dart  # Tutorial dialog (NEW)
+```
+
 ---
 
 **Referensi:**

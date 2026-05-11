@@ -383,6 +383,123 @@ class GameScreen extends ConsumerWidget {
 - **FutureProvider** untuk async operations
 - Hindari mencampur business logic di dalam widget
 
+## 10. Additional Features
+
+### High Score Provider (Home Screen)
+
+```dart
+// presentation/screens/home_screen.dart
+final highScoreProvider = FutureProvider<int>((ref) async {
+  final repository = ref.read(scoreRepositoryProvider);
+  return repository.getHighScore();
+});
+
+class HomeScreen extends ConsumerWidget {
+  final VoidCallback onPlayPressed;
+
+  const HomeScreen({super.key, required this.onPlayPressed});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final highScoreAsync = ref.watch(highScoreProvider);
+
+    // Tampilkan high score jika > 0
+    highScoreAsync.when(
+      data: (highScore) {
+        if (highScore > 0) {
+          // Tampilkan container "High Score: $highScore"
+        }
+      },
+      // ...
+    );
+  }
+}
+```
+
+### Matched & Falling Block IDs (GameNotifier)
+
+```dart
+// presentation/providers/game_provider.dart
+class GameNotifier extends StateNotifier<GameState> {
+  Set<String> _matchedBlockIds = {};
+  Set<String> _fallingBlockIds = {};
+
+  Set<String> get matchedBlockIds => _matchedBlockIds;
+  Set<String> get fallingBlockIds => _fallingBlockIds;
+
+  // Usage dalam _processMatches:
+  Future<void> _processMatches(Grid grid, List<List<Block>> matches) async {
+    // ... process matches ...
+
+    // Set matched blocks untuk animasi
+    _matchedBlockIds = allMatchedBlocks.map((b) => b.id).toSet();
+    state = state.copyWith(lastMatches: matches...);
+
+    await Future.delayed(const Duration(milliseconds: 450));
+
+    var processedGrid = _removeBlocks(grid, allMatchedBlocks);
+    _matchedBlockIds = {};
+
+    // Set falling blocks untuk animasi gravity
+    _fallingBlockIds = _getFallingBlocks(processedGrid);
+    state = state.copyWith(grid: processedGrid);
+
+    await Future.delayed(const Duration(milliseconds: 450));
+
+    processedGrid = _applyGravity.execute(processedGrid);
+    state = state.copyWith(grid: processedGrid);
+
+    await Future.delayed(const Duration(milliseconds: 450));
+
+    processedGrid = _refillGrid.execute(processedGrid, _numColors);
+    _fallingBlockIds = {};
+
+    // ... cascade logic
+  }
+
+  Set<String> _getFallingBlocks(Grid grid) {
+    final falling = <String>{};
+    for (int row = 0; row < grid.rows; row++) {
+      for (int col = 0; col < grid.cols; col++) {
+        final block = grid.getBlock(row, col);
+        if (block != null) {
+          falling.add(block.id);
+        }
+      }
+    }
+    return falling;
+  }
+}
+```
+
+### GameGrid dengan Swipe Support
+
+```dart
+// presentation/widgets/game_grid.dart
+class GameGrid extends StatefulWidget {
+  final Grid grid;
+  final Block? selectedBlock;
+  final Function(Block) onBlockTap;
+  final Function(Block, Direction) onBlockSwipe;  // NEW
+  final Set<String> matchedBlockIds;                // NEW
+  final Set<String> fallingBlockIds;                // NEW
+  final VoidCallback? onAnimationComplete;
+
+  const GameGrid({
+    super.key,
+    required this.grid,
+    this.selectedBlock,
+    required this.onBlockTap,
+    required this.onBlockSwipe,
+    this.matchedBlockIds = const {},
+    this.fallingBlockIds = const {},
+    this.onAnimationComplete,
+  });
+
+  // ...
+}
+```
+
 ---
 
 **Referensi:**

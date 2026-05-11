@@ -407,9 +407,9 @@ class ScoreBreakdown {
 ```dart
 // domain/usecases/refill_grid.dart
 import 'dart:math';
+import 'package:uuid/uuid.dart';
 import '../entities/grid.dart';
 import '../entities/block.dart';
-import 'package:uuid/uuid.dart';
 
 class RefillGrid {
   final Random _random = Random();
@@ -419,7 +419,7 @@ class RefillGrid {
     var newGrid = grid;
 
     for (int col = 0; col < grid.cols; col++) {
-      for int row = 0; row < grid.rows; row++) {
+      for (int row = 0; row < grid.rows; row++) {
         if (newGrid.getBlock(row, col) == null) {
           final newBlock = Block(
             id: _uuid.v4(),
@@ -434,38 +434,17 @@ class RefillGrid {
 
     return newGrid;
   }
-
-  // Generate spawn position (from top)
-  List<NewBlockSpawn> getSpawnPositions(Grid grid) {
-    final spawns = <NewBlockSpawn>[];
-
-    for (int col = 0; col < grid.cols; col++) {
-      for (int row = 0; row < grid.rows; row++) {
-        if (grid.getBlock(row, col) == null) {
-          spawns.add(NewBlockSpawn(
-            row: row,
-            col: col,
-            spawnRow: -1 - (row % 3), // Stagger spawn
-          ));
-        }
-      }
-    }
-
-    return spawns;
-  }
 }
+```
 
-class NewBlockSpawn {
-  final int row;
-  final int col;
-  final int spawnRow;
+### Usage in GameNotifier
 
-  const NewBlockSpawn({
-    required this.row,
-    required this.col,
-    required this.spawnRow,
-  });
-}
+```dart
+// presentation/providers/game_provider.dart
+static const int _numColors = 4;
+
+// Dalam _processMatches:
+processedGrid = _refillGrid.execute(processedGrid, _numColors);
 ```
 
 ## 8. Check Game Over Use Case
@@ -595,7 +574,49 @@ enum GameOverReason {
 }
 ```
 
-## 9. Testing Use Cases
+## 9. Handle Swipe (GameNotifier)
+
+```dart
+// presentation/providers/game_provider.dart
+enum Direction { up, down, left, right }
+
+Future<void> handleSwipe(Block block, Direction direction) async {
+  if (state.isAnimating) return;
+
+  int targetRow = block.row;
+  int targetCol = block.col;
+
+  switch (direction) {
+    case Direction.up:
+      targetRow = block.row - 1;
+      break;
+    case Direction.down:
+      targetRow = block.row + 1;
+      break;
+    case Direction.left:
+      targetCol = block.col - 1;
+      break;
+    case Direction.right:
+      targetCol = block.col + 1;
+      break;
+  }
+
+  // Check bounds
+  if (targetRow < 0 ||
+      targetRow >= state.grid.rows ||
+      targetCol < 0 ||
+      targetCol >= state.grid.cols) {
+    return;
+  }
+
+  final targetBlock = state.grid.getBlock(targetRow, targetCol);
+  if (targetBlock == null) return;
+
+  await swapBlocks(block, targetBlock);
+}
+```
+
+## 10. Testing Use Cases
 
 ```dart
 // test/domain/usecases/detect_matches_test.dart
