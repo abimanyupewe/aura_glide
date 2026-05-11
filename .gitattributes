@@ -1,0 +1,7 @@
+# Mengabaikan boilerplate Flutter dari statistik GitHub Linguist
+android/** linguist-vendored
+ios/** linguist-vendored
+linux/** linguist-vendored
+macos/** linguist-vendored
+windows/** linguist-vendored
+web/** linguist-vendored
