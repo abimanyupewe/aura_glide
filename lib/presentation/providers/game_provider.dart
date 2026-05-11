@@ -10,6 +10,7 @@ import '../../domain/usecases/detect_matches.dart';
 import '../../domain/usecases/apply_gravity.dart';
 import '../../domain/usecases/calculate_score.dart';
 import '../../domain/usecases/refill_grid.dart';
+import '../widgets/block_widget.dart';
 import 'providers.dart';
 
 final gameProvider =
@@ -35,6 +36,12 @@ class GameNotifier extends StateNotifier<GameState> {
   final Uuid _uuid = const Uuid();
 
   static const int _numColors = 4;
+
+  Set<String> _matchedBlockIds = {};
+  Set<String> _fallingBlockIds = {};
+
+  Set<String> get matchedBlockIds => _matchedBlockIds;
+  Set<String> get fallingBlockIds => _fallingBlockIds;
 
   GameNotifier(
     this._swapBlocks,
@@ -107,6 +114,40 @@ class GameNotifier extends StateNotifier<GameState> {
     return false;
   }
 
+  Future<void> handleSwipe(Block block, Direction direction) async {
+    if (state.isAnimating) return;
+
+    int targetRow = block.row;
+    int targetCol = block.col;
+
+    switch (direction) {
+      case Direction.up:
+        targetRow = block.row - 1;
+        break;
+      case Direction.down:
+        targetRow = block.row + 1;
+        break;
+      case Direction.left:
+        targetCol = block.col - 1;
+        break;
+      case Direction.right:
+        targetCol = block.col + 1;
+        break;
+    }
+
+    if (targetRow < 0 ||
+        targetRow >= state.grid.rows ||
+        targetCol < 0 ||
+        targetCol >= state.grid.cols) {
+      return;
+    }
+
+    final targetBlock = state.grid.getBlock(targetRow, targetCol);
+    if (targetBlock == null) return;
+
+    await swapBlocks(block, targetBlock);
+  }
+
   Future<void> swapBlocks(Block from, Block to) async {
     if (state.isAnimating) return;
     if (!_swapBlocks.isValidSwap(state.grid, from.row, from.col, to.row, to.col)) {
@@ -149,13 +190,28 @@ class GameNotifier extends StateNotifier<GameState> {
       await _scoreRepository.saveHighScore(newHighScore);
     }
 
+    _matchedBlockIds = allMatchedBlocks.map((b) => b.id).toSet();
+    state = state.copyWith(lastMatches: matches
+        .map((m) => MatchResult(blocks: m, points: totalPoints ~/ matches.length))
+        .toList());
+
+    await Future.delayed(const Duration(milliseconds: 450));
+
     var processedGrid = _removeBlocks(grid, allMatchedBlocks);
-    await Future.delayed(const Duration(milliseconds: 200));
+    _matchedBlockIds = {};
+
+    _fallingBlockIds = _getFallingBlocks(processedGrid);
+    state = state.copyWith(grid: processedGrid);
+
+    await Future.delayed(const Duration(milliseconds: 450));
 
     processedGrid = _applyGravity.execute(processedGrid);
-    await Future.delayed(const Duration(milliseconds: 200));
+    state = state.copyWith(grid: processedGrid);
+
+    await Future.delayed(const Duration(milliseconds: 450));
 
     processedGrid = _refillGrid.execute(processedGrid, _numColors);
+    _fallingBlockIds = {};
 
     final cascadeMatches = _detectMatches.execute(processedGrid);
 
@@ -166,9 +222,6 @@ class GameNotifier extends StateNotifier<GameState> {
         highScore: newHighScore,
         cascadeMultiplier: state.cascadeMultiplier + 1,
         isAnimating: false,
-        lastMatches: matches
-            .map((m) => MatchResult(blocks: m, points: totalPoints))
-            .toList(),
       );
 
       await Future.delayed(const Duration(milliseconds: 300));
@@ -183,6 +236,19 @@ class GameNotifier extends StateNotifier<GameState> {
         lastMatches: [],
       );
     }
+  }
+
+  Set<String> _getFallingBlocks(Grid grid) {
+    final falling = <String>{};
+    for (int row = 0; row < grid.rows; row++) {
+      for (int col = 0; col < grid.cols; col++) {
+        final block = grid.getBlock(row, col);
+        if (block != null) {
+          falling.add(block.id);
+        }
+      }
+    }
+    return falling;
   }
 
   Grid _removeBlocks(Grid grid, List<Block> blocks) {
@@ -215,6 +281,8 @@ class GameNotifier extends StateNotifier<GameState> {
 
   void resetGame() {
     state = GameState.initial();
+    _matchedBlockIds = {};
+    _fallingBlockIds = {};
     _initializeGame();
   }
 }

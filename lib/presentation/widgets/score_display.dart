@@ -82,7 +82,7 @@ class _ScoreDisplayState extends State<ScoreDisplay>
             margin: const EdgeInsets.only(top: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.accentWarning.withOpacity(0.2),
+              color: AppColors.accentWarning.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
