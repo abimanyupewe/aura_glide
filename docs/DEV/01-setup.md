@@ -92,11 +92,11 @@ lib/
 │   │   ├── home_screen.dart
 │   │   └── game_screen.dart
 │   └── widgets/
-│       ├── game_grid.dart
-│       ├── block_widget.dart
-│       ├── score_display.dart
-│       └── floating_score.dart
-└── app.dart
+│       ├── game_grid.dart            # Grid container with swipe
+│       ├── block_widget.dart         # Individual block with gestures
+│       ├── score_display.dart        # Score UI
+│       └── how_to_play_dialog.dart   # Tutorial dialog
+└── app.dart                          # App config + AppNavigator
 ```
 
 ## 4. Konfigurasi Linting (analysis_options.yaml)
