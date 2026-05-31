@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -42,6 +43,7 @@ class GameNotifier extends StateNotifier<GameState> {
 
   Set<String> get matchedBlockIds => _matchedBlockIds;
   Set<String> get fallingBlockIds => _fallingBlockIds;
+  Timer? _timer;
 
   GameNotifier(
     this._swapBlocks,
@@ -52,6 +54,39 @@ class GameNotifier extends StateNotifier<GameState> {
     this._scoreRepository,
   ) : super(GameState.initial()) {
     _initializeGame();
+    _startTimer();
+  }
+
+  void startGame(GameMode mode) {
+    _timer?.cancel();
+    state = GameState.initial(mode: mode);
+    _matchedBlockIds = {};
+    _fallingBlockIds = {};
+    _initializeGame();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    if (state.mode == GameMode.normal) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (state.status == GameStatus.playing) {
+          final newTime = state.timeLeft - 1;
+          if (newTime <= 0) {
+            _timer?.cancel();
+            state = state.copyWith(timeLeft: 0, status: GameStatus.gameOver);
+          } else {
+            state = state.copyWith(timeLeft: newTime);
+          }
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   Future<void> _initializeGame() async {
@@ -195,6 +230,10 @@ class GameNotifier extends StateNotifier<GameState> {
         .map((m) => MatchResult(blocks: m, points: totalPoints ~/ matches.length))
         .toList());
 
+    if (state.mode == GameMode.normal) {
+      state = state.copyWith(timeLeft: 60);
+    }
+
     await Future.delayed(const Duration(milliseconds: 450));
 
     var processedGrid = _removeBlocks(grid, allMatchedBlocks);
@@ -280,9 +319,11 @@ class GameNotifier extends StateNotifier<GameState> {
   }
 
   void resetGame() {
-    state = GameState.initial();
+    _timer?.cancel();
+    state = GameState.initial(mode: state.mode);
     _matchedBlockIds = {};
     _fallingBlockIds = {};
     _initializeGame();
+    _startTimer();
   }
 }

@@ -5,6 +5,7 @@ import '../providers/game_provider.dart';
 import '../widgets/game_grid.dart';
 import '../widgets/score_display.dart';
 import '../widgets/how_to_play_dialog.dart';
+import '../../domain/entities/game_state.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
@@ -33,7 +34,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final notifier = ref.read(gameProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -44,23 +45,48 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               multiplier: gameState.cascadeMultiplier,
             ),
             const SizedBox(height: 8),
-            Text(
-              'Swipe blocks to match 3!',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            if (gameState.mode == GameMode.normal)
+              Text(
+                'Time Left: ${gameState.timeLeft}s',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: gameState.timeLeft <= 10 ? AppColors.accentWarning : Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+              )
+            else
+              Text(
+                'Chill Mode',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
             const Spacer(),
-            GameGrid(
-              grid: gameState.grid,
-              selectedBlock: gameState.selectedBlock,
-              matchedBlockIds: notifier.matchedBlockIds,
-              fallingBlockIds: notifier.fallingBlockIds,
-              onBlockTap: (block) {
-                ref.read(gameProvider.notifier).selectBlock(block);
-              },
-              onBlockSwipe: (block, direction) {
-                ref.read(gameProvider.notifier).handleSwipe(block, direction);
-              },
-            ),
+            if (gameState.status == GameStatus.gameOver)
+              Expanded(
+                flex: 4,
+                child: Center(
+                  child: Text(
+                    'Time\'s Up!',
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          color: AppColors.accentWarning,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              )
+            else
+              GameGrid(
+                grid: gameState.grid,
+                selectedBlock: gameState.selectedBlock,
+                matchedBlockIds: notifier.matchedBlockIds,
+                fallingBlockIds: notifier.fallingBlockIds,
+                onBlockTap: (block) {
+                  ref.read(gameProvider.notifier).selectBlock(block);
+                },
+                onBlockSwipe: (block, direction) {
+                  ref.read(gameProvider.notifier).handleSwipe(block, direction);
+                },
+              ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.all(16),

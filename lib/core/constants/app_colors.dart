@@ -13,10 +13,16 @@ class AppColors {
   static const Color lavender = Color(0xFFE0BBE4);
   static const Color softYellow = Color(0xFFFFE5B4);
 
+  static const Color darkBackground = Color(0xFF121212);
+  static const Color darkBackgroundSecondary = Color(0xFF1E1E1E);
+
   static const Color textPrimary = Color(0xFF6B7280);
   static const Color textSecondary = Color(0xFF9CA3AF);
   static const Color textTertiary = Color(0xFFD1D5DB);
   static const Color textOnDark = Color(0xFFFFFFFF);
+
+  static const Color textPrimaryDark = Color(0xFFF9FAFB);
+  static const Color textSecondaryDark = Color(0xFFD1D5DB);
 
   static const Color accentPositive = Color(0xFF10B981);
   static const Color accentWarning = Color(0xFFF59E0B);

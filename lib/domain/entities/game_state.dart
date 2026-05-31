@@ -3,6 +3,7 @@ import 'block.dart';
 import 'grid.dart';
 
 enum GameStatus { initial, playing, paused, gameOver }
+enum GameMode { chill, normal }
 
 class GameState extends Equatable {
   final Grid grid;
@@ -13,6 +14,8 @@ class GameState extends Equatable {
   final Block? selectedBlock;
   final bool isAnimating;
   final List<MatchResult> lastMatches;
+  final GameMode mode;
+  final int timeLeft;
 
   const GameState({
     required this.grid,
@@ -23,6 +26,8 @@ class GameState extends Equatable {
     this.selectedBlock,
     this.isAnimating = false,
     this.lastMatches = const [],
+    this.mode = GameMode.chill,
+    this.timeLeft = 60,
   });
 
   GameState copyWith({
@@ -35,6 +40,8 @@ class GameState extends Equatable {
     bool? isAnimating,
     List<MatchResult>? lastMatches,
     bool clearSelectedBlock = false,
+    GameMode? mode,
+    int? timeLeft,
   }) {
     return GameState(
       grid: grid ?? this.grid,
@@ -46,12 +53,16 @@ class GameState extends Equatable {
           clearSelectedBlock ? null : (selectedBlock ?? this.selectedBlock),
       isAnimating: isAnimating ?? this.isAnimating,
       lastMatches: lastMatches ?? this.lastMatches,
+      mode: mode ?? this.mode,
+      timeLeft: timeLeft ?? this.timeLeft,
     );
   }
 
-  factory GameState.initial() {
+  factory GameState.initial({GameMode mode = GameMode.chill}) {
     return GameState(
       grid: Grid.empty(rows: 8, cols: 8),
+      mode: mode,
+      timeLeft: 60,
     );
   }
 
@@ -65,6 +76,8 @@ class GameState extends Equatable {
         selectedBlock,
         isAnimating,
         lastMatches,
+        mode,
+        timeLeft,
       ];
 }
 

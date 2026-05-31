@@ -39,6 +39,13 @@
 * **High Score:** Sistem secara lokal menyimpan skor tertinggi pemain menggunakan *Local Storage*.  
 * **Save State (Opsional \- Target Lanjutan):** Menyimpan status matriks terakhir saat aplikasi ditutup agar bisa dilanjutkan nanti.
 
+### **4.3. Game Modes & Themes**
+
+* **Game Modes:** Terdapat dua mode permainan:
+  * **Chill Mode:** Tanpa tekanan batas waktu (Zen mode standar).
+  * **Normal Mode:** Mode dengan batas waktu 60 detik. Timer akan di-reset setiap kali ada *match*. Jika waktu habis, *game over*.
+* **Themes:** Mendukung peralihan antara *Light Theme* dan *Dark Theme* untuk kenyamanan visual.
+
 ## **5\. Non-Functional Requirements (Tech Specs)**
 
 * **Framework:** Flutter (Widget-based murni, tanpa Flame Engine).  
@@ -53,7 +60,6 @@
 
 Agar proyek selesai dengan cepat dan kualitas portofolio terjaga, fitur berikut **TIDAK AKAN** dibuat:
 
-* Timer atau batasan waktu (merusak tema *calming*).  
 * *Leaderboard Online* / Login akun (membutuhkan backend, tidak fokus pada offline-first).  
 * Sistem nyawa / Energi (membutuhkan monetisasi).
 
