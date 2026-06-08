@@ -20,4 +20,23 @@ class AppTheme {
       textTheme: AppTypography.textTheme,
     );
   }
+
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.dark(
+        primary: AppColors.mintGreen,
+        secondary: AppColors.babyBlue,
+        surface: AppColors.darkBackground,
+        onPrimary: AppColors.textPrimaryDark,
+        onSecondary: AppColors.textPrimaryDark,
+        onSurface: AppColors.textPrimaryDark,
+      ),
+      scaffoldBackgroundColor: AppColors.darkBackground,
+      textTheme: AppTypography.textTheme.apply(
+        bodyColor: AppColors.textPrimaryDark,
+        displayColor: AppColors.textPrimaryDark,
+      ),
+    );
+  }
 }
